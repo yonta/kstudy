@@ -118,6 +118,7 @@ let a = reset (fun () ->
           1 2;;
 
 let printf format to_s = reset (fun () -> format (shift (fun k -> to_s k))) ;;
-let format = fun a -> fun b -> "hello " ^ a ^ b ;;
-let to_s k = fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2) ;;
-let a = printf format to_s 1 2;;
+let a =
+  let format = fun a -> fun b -> "hello " ^ a ^ " " ^ b in
+  let to_s = fun k -> fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2) in
+  printf format to_s 1 2;;
