@@ -100,3 +100,21 @@ let tree2 = Node (Empty, 1, Node (Empty, 2, Node (Empty, 3, Empty))) ;;
 let tree3 = Node (Empty, 1, Node (Empty, 4, Node (Empty, 3, Empty))) ;;
 let a = same_fringe tree1 tree2;;
 let a = same_fringe tree1 tree3;;
+
+(* -------- 2.8 -------- *)
+
+let f x = reset (fun () -> shift (fun k -> fun () -> k "hello") ^ " world") x ;;
+let a = f ();;
+
+(* ex.8 *)
+let a = reset (fun () -> "hello " ^ shift (fun k -> fun s -> k s) ^ "!") "world" ;;
+let a = reset (fun () ->
+            (fun a -> fun b -> "hello " ^ a ^ b)
+              (shift (fun k ->
+                   fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2))))
+          1 2;;
+
+let printf format to_s = reset (fun () -> format (shift (fun k -> to_s k))) ;;
+let format = fun a -> fun b -> "hello " ^ a ^ b ;;
+let to_s k = fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2) ;;
+let a = printf format to_s 1 2;;
