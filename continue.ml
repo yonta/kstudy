@@ -6,11 +6,14 @@ let rec times lst = match lst with
     [] -> 1
   | 0 :: _ -> shift (fun _ -> 0)
   | first :: rest -> first * times rest ;;
-let rec times = function
+let rec times = function        (* functionを使った場合 *)
     [] -> 1
   | 0 :: _ -> shift (fun _ -> 0)
   | first :: rest -> first * times rest ;;
 let a = reset (fun () -> times [2; 3; 0; 5]) ;;
+
+let times2 l = reset (fun () -> times l);; (* resetも関数に組み込んだ場合 *)
+let a = times2 [2; 3; 0; 5];;
 
 (* -------- 2.6 -------- *)
 
