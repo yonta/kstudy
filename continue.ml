@@ -110,15 +110,46 @@ let f x = reset (fun () -> shift (fun k -> fun () -> k "hello") ^ " world") x ;;
 let a = f ();;
 
 (* ex.8 *)
-let a = reset (fun () -> "hello " ^ shift (fun k -> fun s -> k s) ^ "!") "world" ;;
+(*
+ * reset (fun () -> "hello " ^ [...] ^ "!") に相当する式
+ *)
+let a = reset (fun () ->
+            "hello " ^ shift (fun k -> fun s -> k s) ^ "!") "world" ;;
+
+(*
+ * 引数を複数渡す例、一般化されておらず汚い回答
+ *)
+(*
+ * 1つ、引数を複数渡す例を考えてみる
+ * その例から、「printf format to_s arg1 arg2...」くらいにしようとしてみる
+ *)
 let a = reset (fun () ->
             (fun a -> fun b -> "hello " ^ a ^ b)
               (shift (fun k ->
-                   fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2))))
+                   fun d1 ->
+                   fun d2 -> k (string_of_int d1) (string_of_int d2))))
           1 2;;
-
+(*
+ * 毎回、複雑なformatと複雑なto_sを書く必要があるが、
+ * 「printf format to_s arg1 arg2...」の書き方で、引数を複数渡すことができる
+ *)
 let printf format to_s = reset (fun () -> format (shift (fun k -> to_s k))) ;;
 let a =
   let format = fun a -> fun b -> "hello " ^ a ^ " " ^ b in
-  let to_s = fun k -> fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2) in
+  let to_s = fun k ->
+    fun d1 -> fun d2 -> k (string_of_int d1) (string_of_int d2) in
   printf format to_s 1 2;;
+
+(*
+ * 勉強会での回答
+ * 引数を複数渡すのをより一般化していて綺麗
+ * この例は論文からとってきたらしい
+ *)
+let int x = string_of_int x;;
+let str (x : string) = x;;
+let p to_str = shift (fun k -> fun x -> k (to_str x));;
+let sprintf p = reset (fun () -> p ());;
+let a = sprintf (fun () -> "string " ^ (p str) ^ " !") "ABC";;
+let a =
+  sprintf (fun () -> "string " ^ (p str) ^ " and int " ^ (p int) ^ " !")
+    10 "ABC";;
