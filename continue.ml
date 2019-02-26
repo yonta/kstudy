@@ -153,3 +153,32 @@ let a = sprintf (fun () -> "string " ^ (p str) ^ " !") "ABC";;
 let a =
   sprintf (fun () -> "string " ^ (p str) ^ " and int " ^ (p int) ^ " !")
     10 "ABC";;
+
+(* -------- 2.10 -------- *)
+let get () = shift (fun k -> fun state -> k state state) ;;
+let tick () = shift (fun k -> fun state -> k () (state + 1)) ;;
+let run_state thunk = reset (fun () -> let result = thunk ()
+                                       in  fun state -> result)
+                        0 ;;
+let a = run_state (fun () ->
+            tick (); (* state = 1 *)
+            tick (); (* state = 2 *)
+            let a = get () in
+            tick (); (* state = 3 *)
+            get () - a) ;;
+
+(* ex.9 *)
+(*
+ * OchaCamlの中置演算子は右引数を評価してから左引数を評価するため、2-1になる。
+ *)
+let a = run_state (fun () -> (tick (); get ()) - (tick (); get ())) ;;
+
+(* ex.10 *)
+(* ()を返し、stateを引数で更新する *)
+let put x = shift (fun k -> fun _ -> k () x) ;;
+let a = run_state (fun () ->
+            tick (); (* state = 1 *)
+            let a = get () in
+            put 10;   (* state = 10 *)
+            tick (); (* state = 11 *)
+            get () - a) ;;
